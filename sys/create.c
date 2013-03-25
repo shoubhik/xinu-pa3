@@ -95,6 +95,8 @@ SYSCALL create(procaddr,ssize,priority,name,nargs,args)
 	*--saddr = 0;		/* %esi */
 	*--saddr = 0;		/* %edi */
 	*pushsp = pptr->pesp = (unsigned long)saddr;
+	kprintf("initializing page dir for proc %d\n", pid);
+	initialize_pg_dir(&(pptr->pg_dir));
 
 	restore(ps);
 

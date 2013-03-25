@@ -4,7 +4,9 @@
 #include <proc.h>
 #include <paging.h>
 #include <stdio.h>
-
+#ifndef DEBUG
+#define DEBUG
+#endif
 /*-------------------------------------------------------------------------
  * init_frm - initialize frm_tab
  *-------------------------------------------------------------------------
@@ -13,17 +15,16 @@ SYSCALL init_frm()
 {
 	int  i;
 	for(i = 0 ;i < NFRAMES; i++){
-		fr_map_t *frame = &frm_tab[i];
-		frame->fr_status = FRM_UNMAPPED;
-		frame->fr_pid = 0;
-		frame->fr_vpno = 0;
-		frame->fr_refcnt = 0;
-		frame->fr_type = FR_PAGE;
-		frame->fr_dirty = 0;
-		frame->cookie = NULL;
-		frame->fr_loadtime = 0;
-		frame->base_addr = getBaseAddress(i);
-		frame->frm_num = i;
+		frm_tab[i].fr_status = FRM_UNMAPPED;
+		frm_tab[i].fr_pid = 0;
+		frm_tab[i].fr_vpno = 0;
+		frm_tab[i].fr_refcnt = 0;
+		frm_tab[i].fr_type = FR_PAGE;
+		frm_tab[i].fr_dirty = 0;
+		frm_tab[i].cookie = NULL;
+		frm_tab[i].fr_loadtime = 0;
+		frm_tab[i].base_addr = getBaseAddress(i+FRAME0);
+		frm_tab[i].frm_num = i+FRAME0;
 	}
   return OK;
 }
@@ -36,10 +37,10 @@ SYSCALL get_frm(fr_map_t **frame, int frameType)
 {
 	// for now just return the first frame.
   int  i;
-  for( i = FRAME0; i < FRAME0 + NFRAMES; i++){
+  for( i = 0; i < NFRAMES; i++){
 	  if(frm_tab[i].fr_status == FRM_UNMAPPED){
 #ifdef DEBUG
-		  kprintf("assigning frame %d for frame type %d", i, frameType);
+		  kprintf("assigning frame %d for frame type %d and base address = %d\n", frm_tab[i].frm_num, frameType, frm_tab[i].base_addr);
 #endif
 		  frm_tab[i].fr_status = FRM_MAPPED;
 		  frm_tab[i].fr_type = frameType;
@@ -66,7 +67,12 @@ unsigned long getBaseAddress(int frameNumber){
 }
 
 unsigned long getOffsetAddress(int frameNumber, int offset){
-	return getBaseAddress(frameNumber) + (unsigned long)(offset*sizeof(long)*BYTE);
+	unsigned long result = getBaseAddress(frameNumber) + (unsigned long)(offset*sizeof(long));
+	if(offset  == 128 ){
+		kprintf("address for frame %d and offset 128 is %d\n", frameNumber, result);
+	}
+	return result;
+
 }
 
 SYSCALL writeLong(int frame, int offset, unsigned long value){
@@ -82,6 +88,9 @@ SYSCALL writeLong(int frame, int offset, unsigned long value){
 SYSCALL readLong(int frame , int offset, unsigned long **data){
 	if((frame < 1024 || frame > 4095) || (offset < 0  || offset > 1024))
 			return SYSERR;
+#ifdef DEBUG
+	kprintf("for frame %d and offset %d data = %d\n", frame, offset, *((unsigned long *)getOffsetAddress(frame, offset)));
+#endif
 	*data = (unsigned long *)getOffsetAddress(frame, offset);
 	return OK;
 }

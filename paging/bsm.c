@@ -5,12 +5,27 @@
 #include <paging.h>
 #include <proc.h>
 
+#ifndef DEBUG
+#define DEBUG
+#endif
+
 /*-------------------------------------------------------------------------
  * init_bsm- initialize bsm_tab
  *-------------------------------------------------------------------------
  */
 SYSCALL init_bsm()
 {
+	int i;
+	for(i=0;i<NUM_BACKING_STORE;i++){
+#ifdef DEBUG
+		kprintf("initializing bs with id: %d\n", i);
+#endif
+		bsm_tab[i].bs_npages = NUM_BS_PAGES;
+		bsm_tab[i].bs_pid = 0;
+		bsm_tab[i].bs_status = BSM_UNMAPPED;
+		bsm_tab[i].bs_vpno = 0;
+	}
+	return OK;
 }
 
 /*-------------------------------------------------------------------------
@@ -19,6 +34,17 @@ SYSCALL init_bsm()
  */
 SYSCALL get_bsm(int* avail)
 {
+	int  i;
+	for(i=0;i<NUM_BACKING_STORE;i++){
+		if(bsm_tab[i].bs_status == BSM_UNMAPPED){
+#ifdef DEBUG
+	kprintf("granted backing store: %d\n", i);
+#endif
+			*avail = i;
+			return OK;
+		}
+	}
+	return SYSERR;
 }
 
 

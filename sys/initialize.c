@@ -12,7 +12,7 @@
 #include <io.h>
 #include <paging.h>
 
-#define DEBUG
+#define DEBUG 1
 /*#define DETAIL */
 #define HOLESIZE	(600)	
 #define	HOLESTART	(640 * 1024)
@@ -52,9 +52,11 @@ int	console_dev;		/* the console device			*/
 /*  added for the demand paging */
 int page_replace_policy = FIFO;
 /* data structures for initializations */
-fr_map_t frm_tab[NFRAMES];
+
 page_table glb_pages[NUM_GLB_PAGES];
-void init_glb_pages();
+fr_map_t frm_tab[NFRAMES];
+page_dir proc_zero_page_dir;
+bs_map_t bsm_tab[NUM_BACKING_STORE];
 
 /************************************************************************/
 /***				NOTE:				      ***/
@@ -85,13 +87,10 @@ nulluser()				/* babysit CPU when no one is home */
 	kprintf("system running up!\n");
 	init_frm();
 	init_glb_pages();
-	writeLong(1026,3,1126);
-	unsigned long *data;
-	if(readLong(1026,3, &data) == SYSERR){
-		kprintf("error reading data !!\n");
-	}
-	else{
-		kprintf("val = %d\n", *data);
+	kprintf("initializing page dir for proc 0\n");
+	initialize_pg_dir(&proc_zero_page_dir);
+	if(init_bsm() == SYSERR){
+		kprintf("failed to initialize backing stores");
 	}
 	sysinit();
 
@@ -282,15 +281,4 @@ long sizmem()
 	return npages;
 }
 
-void init_glb_pages(){
-  int  i, j;
-  fr_map_t *free_frame;
-  for(i = 0 ;i < NUM_GLB_PAGES; i++){
-	  get_frm(free_frame, FR_TBL);
-	  glb_pages[i].base_adder = free_frame->base_addr;
-	  free_frame->fr_pid = currpid;
-	  for(j = 0; j < NUM_PAGE_TBL_ENTRIES;j++ ){
-		  writeLong(free_frame->frm_num, j, (i*NUM_PAGE_TBL_ENTRIES) + j);
-	  }
-  }
-}
+
