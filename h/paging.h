@@ -32,7 +32,8 @@ typedef struct{
   unsigned int pd_offset : 10;		/* page directory offset	*/
 } virt_addr_t;
 
-typedef struct{
+typedef  struct _bs_map_t{
+	struct _bs_map_t *next;
   int bs_status;			/* MAPPED or UNMAPPED		*/
   int bs_pid;				/* process id using this slot   */
   int bs_vpno;				/* starting virtual page number */
@@ -84,11 +85,24 @@ typedef struct {
 	pd_t pd_entry[NUM_PAGE_DIR_ENTRY];
 }page_dir;
 
+typedef struct _frame_t{
+	struct _frame_t *next;
+} frame_t;
+
+typedef struct {
+	int status;
+	int as_heap; /* is this bs used by heap?*/
+	int npages; /* number of pages in the store */
+	bs_map_t *owners; /* where it is mapped*/
+	frame_t *frm; /* the list of frames that maps this bs*/
+} bs_t;
+
 #define NFRAMES 	1024	/* number of frames		*/
 
-extern bs_map_t bsm_tab[];
+extern bs_t bsm_tab[];
 extern fr_map_t frm_tab[];
 extern page_table glb_pages[];
+extern bs_map_t map[];
 extern page_dir proc_zero_page_dir;
 /* Prototypes for required API calls */
 SYSCALL xmmap(int, bsd_t, int);
@@ -139,5 +153,6 @@ unsigned long getOffsetAddress(int frameNumber, int offset);
 void init_glb_pages();
 void printPageTable(int frm_num);
 void initialize_pg_dir(page_dir *pg_dir);
+bs_t* alloc_bs(bsd_t id, int npages);
 
 #endif

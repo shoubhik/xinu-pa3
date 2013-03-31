@@ -80,6 +80,7 @@ struct	pentry	{
         int     vhpnpages;              /* vheap size                   */
         struct mblock *vmemlist;        /* vheap list              		*/
         page_dir pg_dir;
+        bs_map_t map[NUM_BACKING_STORE];
 };
 
 

@@ -20,10 +20,11 @@ SYSCALL init_bsm()
 #ifdef DEBUG
 		kprintf("initializing bs with id: %d\n", i);
 #endif
-		bsm_tab[i].bs_npages = NUM_BS_PAGES;
-		bsm_tab[i].bs_pid = 0;
-		bsm_tab[i].bs_status = BSM_UNMAPPED;
-		bsm_tab[i].bs_vpno = 0;
+		bsm_tab[i].as_heap = 0;
+		bsm_tab[i].status = BSM_UNMAPPED;
+		bsm_tab[i].npages = 0;
+		bsm_tab[i].frm = NULL;
+		bsm_tab[i].owners = NULL;
 	}
 	return OK;
 }
@@ -36,7 +37,7 @@ SYSCALL get_bsm(int* avail)
 {
 	int  i;
 	for(i=0;i<NUM_BACKING_STORE;i++){
-		if(bsm_tab[i].bs_status == BSM_UNMAPPED){
+		if(bsm_tab[i].status == BSM_UNMAPPED){
 #ifdef DEBUG
 	kprintf("granted backing store: %d\n", i);
 #endif
@@ -45,6 +46,28 @@ SYSCALL get_bsm(int* avail)
 		}
 	}
 	return SYSERR;
+}
+
+bs_t* alloc_bs(bsd_t id, int npages){
+#ifdef DEBUG
+	kprintf("allocating bs %d to proc %d with pages = %d\n", id, currpid, npages);
+#endif
+	bs_t *bs_t = &bsm_tab[id];
+	if(bs_t->npages == 0) bs_t->npages = npages;
+	bs_t->status = BSM_MAPPED;
+	struct pentry *ptr = &proctab[currpid];
+	bs_map_t *map = &(ptr->map[id]);
+	map->next = NULL;
+	bs_map_t *temp = bs_t->owners;
+	if(temp == NULL){
+		temp = map;
+	}
+	else{
+	while(temp->next != NULL)
+		temp = temp->next;
+		temp->next = map;
+	}
+	return bs_t;
 }
 
 
@@ -71,6 +94,7 @@ SYSCALL bsm_lookup(int pid, long vaddr, int* store, int* pageth)
  */
 SYSCALL bsm_map(int pid, int vpno, int source, int npages)
 {
+
 }
 
 

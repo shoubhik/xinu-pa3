@@ -9,9 +9,8 @@ int get_bs(bsd_t bs_id, unsigned int npages) {
 	int avail = 0;
 	if((bs_id < 0 || bs_id > NUM_BACKING_STORE -1) || (npages < 1 || npages > 200))
 		return SYSERR;
-
-    return npages;
-
+	bs_t *bs_t   = alloc_bs(bs_id, npages);
+    return bs_t->npages;
 }
 
 

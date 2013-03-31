@@ -56,7 +56,7 @@ int page_replace_policy = FIFO;
 page_table glb_pages[NUM_GLB_PAGES];
 fr_map_t frm_tab[NFRAMES];
 page_dir proc_zero_page_dir;
-bs_map_t bsm_tab[NUM_BACKING_STORE];
+bs_t bsm_tab[NUM_BACKING_STORE];
 
 /************************************************************************/
 /***				NOTE:				      ***/
