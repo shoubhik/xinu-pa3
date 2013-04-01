@@ -154,5 +154,6 @@ void init_glb_pages();
 void printPageTable(int frm_num);
 void initialize_pg_dir(page_dir *pg_dir);
 bs_t* alloc_bs(bsd_t id, int npages);
+int bs_add_mapping(bsd_t id, int pid, int vpno, int npages);
 
 #endif

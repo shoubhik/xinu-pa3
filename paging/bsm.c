@@ -58,16 +58,36 @@ bs_t* alloc_bs(bsd_t id, int npages){
 	struct pentry *ptr = &proctab[currpid];
 	bs_map_t *map = &(ptr->map[id]);
 	map->next = NULL;
-	bs_map_t *temp = bs_t->owners;
-	if(temp == NULL){
-		temp = map;
+
+	if(bs_t->owners == NULL){
+		bs_t->owners = map;
 	}
 	else{
-	while(temp->next != NULL)
-		temp = temp->next;
+		bs_map_t *temp = bs_t->owners;
+		while(temp->next != NULL)
+			temp = temp->next;
 		temp->next = map;
 	}
 	return bs_t;
+}
+
+int bs_add_mapping(bsd_t id, int pid, int vpno, int npages){
+	bs_t *bs_t = &bsm_tab[id];
+	bs_map_t *temp = bs_t->owners;
+	while(temp != NULL){
+		kprintf("inside while loop\n");
+		if(temp->bs_pid == pid ){
+#ifdef DEBUG
+			kprintf("adding mapping for proc %d for bs %d , starting vpno %d and pages %d\n ",
+					pid, id, vpno, npages);
+#endif
+			temp->bs_vpno = vpno;
+			temp->bs_npages = npages;
+			return OK;
+		}
+		temp = temp->next;
+	}
+	return SYSERR;
 }
 
 

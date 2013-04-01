@@ -27,18 +27,25 @@ int main() {
 		return 0;
 	}
 
-	for (i = 0; i < 16; i++) {
-		*addr = 'A' + i;
-		addr += NBPG;	//increment by one page each time
-	}
+	get_bs(2, 200);
 
-	addr = (char*) 0x40000000; //1G
-	for (i = 0; i < 16; i++) {
-		kprintf("0x%08x: %c\n", addr, *addr);
-		addr += 4096;       //increment by one page each time
-	}
+		if (xmmap(i, 2, 200) == SYSERR) {
+			kprintf("xmmap call failed\n");
+			return 0;
+		}
 
-	xmunmap(0x40000000 >> 12);
+//	for (i = 0; i < 16; i++) {
+//		*addr = 'A' + i;
+//		addr += NBPG;	//increment by one page each time
+//	}
+//
+//	addr = (char*) 0x40000000; //1G
+//	for (i = 0; i < 16; i++) {
+//		kprintf("0x%08x: %c\n", addr, *addr);
+//		addr += 4096;       //increment by one page each time
+//	}
+//
+//	xmunmap(0x40000000 >> 12);
 
 	return 0;
 }

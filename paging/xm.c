@@ -19,8 +19,7 @@ SYSCALL xmmap(int virtpage, bsd_t source, int npages)
 	return SYSERR;
   }
 
-  kprintf("xmmap - to be implemented!\n");
-  return SYSERR;
+  return bs_add_mapping(source, currpid, virtpage, npages);
 }
 
 

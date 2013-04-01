@@ -10,6 +10,7 @@
 #include <paging.h>
 
 LOCAL int newpid();
+LOCAL void init_bs_map(struct	pentry	*pptr, int pid);
 
 /*------------------------------------------------------------------------
  *  create  -  create a process to start running a procedure
@@ -97,7 +98,8 @@ SYSCALL create(procaddr,ssize,priority,name,nargs,args)
 	*pushsp = pptr->pesp = (unsigned long)saddr;
 	kprintf("initializing page dir for proc %d\n", pid);
 	initialize_pg_dir(&(pptr->pg_dir));
-
+	kprintf("initializing proc bs map\n");
+	init_bs_map(pptr, pid);
 	restore(ps);
 
 	return(pid);
@@ -119,4 +121,13 @@ LOCAL int newpid()
 			return(pid);
 	}
 	return(SYSERR);
+}
+
+LOCAL void init_bs_map(struct	pentry	*pptr, int pid){
+	int i;
+	for(i = 0; i < NUM_BACKING_STORE; i++){
+		pptr->map[i].bs_pid = pid;
+		pptr->map[i].next = NULL;
+		pptr->map[i].bs_vpno = 0;
+	}
 }
