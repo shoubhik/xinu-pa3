@@ -30,6 +30,7 @@ typedef	char		Bool;		/* Boolean type			*/
 #define	NULLSTK		MINSTK		/* process 0 stack size		*/
 #define	MAGIC		0125251		/* unusual value for top of stk	*/
 
+
 /* Universal return constants */
 
 #define	OK		 1		/* system call ok		*/

@@ -1,0 +1,10 @@
+WARNING=DO NOT MODIFY THIS FILE IF YOU DON'T UNDERSTAND
+defaultDestination=/152.46.19.97\:\:22/home/sbhatta9/lab3-spring13
+defaultVariables=
+eclipse.preferences.version=1
+includeTeamPrivateFiles=false
+map|0=/|,|,|h/;paging/;sys/|,
+map|1=h|,|,|,|,
+map|2=paging|,|,|,|,
+map|3=sys|,|,|,|,
+useCurrentDateForDestinationFiles=false

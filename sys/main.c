@@ -13,32 +13,11 @@ void halt();
  *------------------------------------------------------------------------
  */
 int main() {
-	char *addr = (char*) 0x40000000; //1G
-	bsd_t bs = 1;
-
-	int i = ((unsigned long) addr) >> 12;	// the ith page
-
-	kprintf("\n\nHello World, Xinu lives\n\n");
-
-	get_bs(bs, 200);
-
-	if (xmmap(i, bs, 200) == SYSERR) {
-		kprintf("xmmap call failed\n");
-		return 0;
-	}
-
-	get_bs(2, 200);
-
-		if (xmmap(i, 2, 200) == SYSERR) {
-			kprintf("xmmap call failed\n");
-			return 0;
-		}
-
 //	for (i = 0; i < 16; i++) {
 //		*addr = 'A' + i;
 //		addr += NBPG;	//increment by one page each time
 //	}
-//
+/////////////////////////////////////////////////////////////////
 //	addr = (char*) 0x40000000; //1G
 //	for (i = 0; i < 16; i++) {
 //		kprintf("0x%08x: %c\n", addr, *addr);

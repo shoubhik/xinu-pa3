@@ -82,7 +82,9 @@ int	resched()
 #ifdef	DEBUG
 	PrintSaved(nptr);
 #endif
-	
+
+//	write_cr3(nptr->pg_dir.base_frm->base_addr);
+	write_cr3(nptr->pg_dir.base_frm->base_addr );
 	ctxsw(&optr->pesp, optr->pirmask, &nptr->pesp, nptr->pirmask);
 
 #ifdef	DEBUG

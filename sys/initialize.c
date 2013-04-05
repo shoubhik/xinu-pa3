@@ -12,6 +12,7 @@
 #include <io.h>
 #include <paging.h>
 
+
 #define DEBUG 1
 /*#define DETAIL */
 #define HOLESIZE	(600)	
@@ -85,16 +86,23 @@ nulluser()				/* babysit CPU when no one is home */
 	initevec();
 
 	kprintf("system running up!\n");
-	init_frm();
-	init_glb_pages();
-	kprintf("initializing page dir for proc 0\n");
-	initialize_pg_dir(&proc_zero_page_dir);
-	if(init_bsm() == SYSERR){
-		kprintf("failed to initialize backing stores");
-	}
-	sysinit();
 
-	enable();		/* enable interrupts */
+
+
+	sysinit();
+	userpid = create(main,INITSTK,INITPRIO,INITNAME,INITARGS);
+	kprintf("initializing cr3 with base addr %d\n",
+			proc_zero_page_dir.base_frm->base_addr);
+//	enable_paging((proctab[NULLPROC].pg_dir.base_frm->base_addr));
+	enable_paging(1028*4096);
+	enable();
+
+	resume(userpid);
+	kprintf("~~~~~~~~~~~~~~~comes here\n");
+
+
+//	enable();		/* enable interrupts */
+//	enable_paging(); /*	enable paging	*/
 
 	sprintf(vers, "PC Xinu %s", VERSION);
 	kprintf("\n\n%s\n", vers);
@@ -129,9 +137,13 @@ nulluser()				/* babysit CPU when no one is home */
 
 
 	/* create a process to execute the user's main program */
-	userpid = create(main,INITSTK,INITPRIO,INITNAME,INITARGS);
-	resume(userpid);
+	/*userpid = create(main,INITSTK,INITPRIO,INITNAME,INITARGS);
+	kprintf("initializing cr3 with base addr %d\n", proc_zero_page_dir.base_frm->base_addr);
+	enable_paging((proctab[NULLPROC].pg_dir.base_frm->base_addr)) ;
+    enable();
 
+	resume(userpid);
+    kprintf("~~~~~~~~~~~~~~~comes here\n");*/
 	while (TRUE)
 		/* empty */;
 }
@@ -201,7 +213,7 @@ sysinit()
 	    init_dev(i);
 	}
 #endif
-
+	set_evec(14, pfintr);
 	pptr = &proctab[NULLPROC];	/* initialize null process entry */
 	pptr->pstate = PRCURR;
 	for (j=0; j<7; j++)
@@ -226,6 +238,13 @@ sysinit()
 
 	rdytail = 1 + (rdyhead=newqueue());/* initialize ready list */
 
+	init_frm();
+	init_glb_pages();
+	kprintf("initializing page dir for proc 0\n");
+	initialize_pg_dir(&proctab[NULLPROC].pg_dir);
+	if (init_bsm() == SYSERR) {
+		kprintf("failed to initialize backing stores");
+	}
 
 	return(OK);
 }
